@@ -33,4 +33,14 @@ class DBOperations:
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name=?;"
         cursor = self.execute_query(query, (table_name,))
         return cursor.fetchone() is not None
+    
+    def print_all(self, table_name):
+        query = f"SELECT * FROM {table_name};"
+        results = self.fetch_all(query)
+        if results:
+            for row in results:
+                print(row)
+        else:
+            print(f"No records found in {table_name}.")
+        logging.info(f"Printed all records from {table_name}.")
    
