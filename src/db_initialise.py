@@ -4,7 +4,7 @@ import csv
 import logging
 from db_operations import DBOperations
 
-def create_schema():
+def create_schema(db_filename):
     db_ops = DBOperations(db_filename)
     db_ops.connect()
 
@@ -89,7 +89,7 @@ def create_schema():
     db_ops.close()
 
 
-def insert_data():
+def insert_data(db_filename):
     db_ops = DBOperations(db_filename)
     db_ops.connect()
 
@@ -113,13 +113,13 @@ def insert_data():
 
     db_ops.close()
 
-def initialise_database():
+def initialise_database(db_filename):
     db_ops = DBOperations(db_filename)
     db_ops.connect()
     if not db_ops.check_populated():
         if not db_ops.check_table_exists('flights'):
-            create_schema()
-        insert_data()
+            create_schema(db_filename)
+        insert_data(db_filename)
     else:
         logging.info("Database already populated with data.")
 

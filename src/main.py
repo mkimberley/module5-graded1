@@ -16,8 +16,8 @@ logging.basicConfig(
 db_filename = "FlightDB.db"
 
 def main():
-    initialise_database()
-    
+    initialise_database(db_filename)
+
     
     greeter = Greet()
     greeter.greet()  

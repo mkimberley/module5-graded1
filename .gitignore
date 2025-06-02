@@ -1,7 +1,6 @@
 *.db
 *.pyc
-__pycache__/
-*.pyo
+src/__pycache__/
 *.pyd
 *.pyc
 *.log
