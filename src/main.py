@@ -1,10 +1,27 @@
 # main.py
-
+import logging
 from db_operations import DBOperations
-from flight_info import FlightInfo
+from db_initialise import initialise_database
+from greet import Greet
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("squeezyjet.log"),
+        logging.StreamHandler()
+    ]
+)
+
+db_filename = "FlightDB.db"
 
 def main():
-
+    initialise_database()
+    
+    
+    greeter = Greet()
+    greeter.greet()  
+    
     while True:
         print("\n Menu:")
         print("**********")
@@ -17,7 +34,8 @@ def main():
         print(" 7. Exit\n")
 
         __choose_menu = int(input("Enter your choice: "))
-        db_ops = DBOperations()
+        db_ops = DBOperations(db_filename)
+        db_ops.connect()
         if __choose_menu == 1:
             db_ops.create_table()
         elif __choose_menu == 2:
@@ -31,11 +49,10 @@ def main():
         elif __choose_menu == 6:
             db_ops.delete_data()
         elif __choose_menu == 7:
+            db_ops.close()
             exit(0)
         else:
             print("Invalid Choice")
-
-
 
 if __name__ == "__main__":
     main()

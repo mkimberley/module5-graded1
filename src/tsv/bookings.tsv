@@ -1,0 +1,11 @@
+booking_id	passenger_name	flight_id	booking_date	status
+1	Thomas Green	1	2025-05-30 10:00:00	Confirmed
+2	Sarah Brown	2	2025-05-30 11:00:00	Confirmed
+3	Emily White	3	2025-05-30 12:00:00	Confirmed
+4	James Taylor	4	2025-05-30 13:00:00	Confirmed
+5	Anna Wilson	5	2025-05-30 14:00:00	Confirmed
+6	Oliver Harris	6	2025-05-30 15:00:00	Confirmed
+7	Charlotte Martin	7	2025-05-30 16:00:00	Confirmed
+8	Harry Thomas	8	2025-05-30 17:00:00	Confirmed
+9	Amelia Brown	9	2025-05-30 18:00:00	Confirmed
+10	Jack Smith	10	2025-05-30 19:00:00	Confirmed
