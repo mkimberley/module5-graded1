@@ -10,6 +10,8 @@ class DBOperations:
         self.connection = sqlite3.connect(self.db_name)
 
     def execute_query(self, query, params=()):
+        if not self.connection:
+            self.connect()  # Ensure connection is established
         cursor = self.connection.cursor()
         cursor.execute(query, params)
         self.connection.commit()
@@ -43,4 +45,3 @@ class DBOperations:
         else:
             print(f"No records found in {table_name}.")
         logging.info(f"Printed all records from {table_name}.")
-   

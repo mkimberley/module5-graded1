@@ -1,73 +1,77 @@
+from flight_info import FlightInfo
+from db_operations import DBOperations
+
 class Menu:
-    def __init__(self, db_operations):
-        self.db_operations = db_operations
+    def __init__(self, db_filename):
+        self.db_operations = DBOperations(db_filename)
+        self.db_operations.connect()
+        self.flight_info = FlightInfo(db_filename)
 
-    def display_main_menu(self):
-        print("\nMain Menu:")
-        print("**********")
-        print(" 1. Manage Flights")
-        print(" 2. Insert data into FlightInfo")
-        print(" 3. Select all data from FlightInfo")
-        print(" 4. Search a flight")
-        print(" 5. Update data some records")
-        print(" 6. Delete data some records")
-        print(" 7. Exit\n")
+        self.main_menu_items = [
+            {"option": 1, "description": "Manage Flights", "function": self.handle_flights_menu},
+            {"option": 2, "description": "Manage Pilots", "function": self.handle_pilots_menu},
+            {"option": 3, "description": "Manage Schedules", "function": self.handle_schedules_menu},
+            {"option": 7, "description": "Exit", "function": self.exit_program},
+        ]
 
-    def display_flights_menu(self):
-        print("\nFlights Menu:")
+        self.flights_menu_items = [
+            {"option": 1, "description": "Create Flights Table", "function": self.create_flights_table},
+            {"option": 3, "description": "View Flights by Criteria", "function": self.view_flights_by_criteria},
+            {"option": 8, "description": "Back to Main Menu", "function": self.display_menu},
+        ]
+
+    def getInput(self, prompt):
+        while True:
+            try:
+                value = input(prompt)
+                if not value.strip():
+                    raise ValueError("Input cannot be empty")
+                return value
+            except ValueError as e:
+                print(f"Invalid input: {e}. Please try again.")
+
+    def display_menu(self, menu_items):
+        print("\nMenu:")
         print("**********")
-        print(" 1. Create table Flights")
-        print(" 2. Insert data into Flights")
-        print(" 3. Select all data from Flights")
-        print(" 4. Search a flight")
-        print(" 5. Update data some records")
-        print(" 6. Delete data some records")
-        print (" 7. Print all flights")
-        print(" 8. Back to Main Menu\n")
+        for item in menu_items:
+            print(f" {item['option']}. {item['description']}")
+        print("\n")
+
+    def run(self):
+        while True:
+            self.display_menu(self.main_menu_items)
+            choice = int(input("Enter your choice: "))
+            for item in self.main_menu_items:
+                if item["option"] == choice:
+                    item["function"]()
+                    break
+            else:
+                print("Invalid choice. Please try again.")
 
     def handle_flights_menu(self):
         while True:
-            self.display_flights_menu()
-            try:
-                choice = int(input("Enter your choice for Flights Menu: "))
-                self.db_operations.connect() 
-                if choice == 1:
-                    self.db_operations.create_table()
-                elif choice == 2:
-                    self.db_operations.insert_data()
-                elif choice == 3:
-                    self.db_operations.select_all()
-                elif choice == 4:
-                    self.db_operations.search_data()
-                elif choice == 5:
-                    self.db_operations.update_data()
-                elif choice == 6:
-                    self.db_operations.delete_data()
-                elif choice == 7:
-                    self.db_operations.print_all('flights')
-                elif choice == 8:
-                    break  # Return to the main menu
-                else:
-                    print("Invalid Choice")
-            finally:
-                self.db_operations.close()
-    def run(self):
-        while True:
-            self.display_main_menu()
-            choice = int(input("Enter your choice: "))
-            if choice == 1:
-                self.handle_flights_menu()  # Navigate to the Flights submenu
-            elif choice == 2:
-                self.db_operations.insert_data()
-            elif choice == 3:
-                self.db_operations.select_all()
-            elif choice == 4:
-                self.db_operations.search_data()
-            elif choice == 5:
-                self.db_operations.update_data()
-            elif choice == 6:
-                self.db_operations.delete_data()
-            elif choice == 7:
-                exit(0)
+            self.display_menu(self.flights_menu_items)
+            choice = int(input("Enter your choice for Flights Menu: "))
+            for item in self.flights_menu_items:
+                if item["option"] == choice:
+                    item["function"]()
+                    break
             else:
-                print("Invalid Choice")
+                print("Invalid choice. Please try again.")
+
+    def create_flights_table(self):
+        print("Creating Flights Table...")
+
+    def view_flights_by_criteria(self):
+        self.flight_info.view_flights_by_criteria()
+
+    def handle_pilots_menu(self):
+        print("Handling Pilots Menu...")
+
+    def handle_schedules_menu(self):
+        print("Handling Schedules Menu...")
+
+    def exit_program(self):
+        print("Exiting program...")
+        self.db_operations.close()
+        exit()

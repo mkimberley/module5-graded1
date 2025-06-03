@@ -23,7 +23,7 @@ def main():
     greeter = Greet()
     greeter.greet()  
 
-    menu = Menu(DBOperations(db_filename))
+    menu = Menu(db_filename)
     menu.run()
     logging.info("Application started successfully.")    
 
