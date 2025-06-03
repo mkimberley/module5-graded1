@@ -24,7 +24,7 @@ def main():
     greeter.greet()  
 
     menu = Menu(db_filename)
-    menu.run()
+    menu.handle_main_menu()
     logging.info("Application started successfully.")    
 
 

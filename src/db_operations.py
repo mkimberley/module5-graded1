@@ -8,14 +8,21 @@ class DBOperations:
 
     def connect(self):
         self.connection = sqlite3.connect(self.db_name)
+        self.connection.set_trace_callback(logging.info)
 
     def execute_query(self, query, params=()):
         if not self.connection:
-            self.connect()  # Ensure connection is established
+            self.connect()
         cursor = self.connection.cursor()
         cursor.execute(query, params)
         self.connection.commit()
-        logging.info(f"Executed schema query: {query.strip()}")
+
+        # Log the query with actual values
+        formatted_query = query
+        for param in params:
+            formatted_query = formatted_query.replace("?", f"'{param}'", 1)
+        logging.info(f"Executed query: {formatted_query.strip()}")
+
         return cursor
 
     def fetch_all(self, query, params=()):
@@ -36,6 +43,14 @@ class DBOperations:
         cursor = self.execute_query(query, (table_name,))
         return cursor.fetchone() is not None
     
+    def check_validation(self, table, column, value):
+        query = f"SELECT COUNT(*) FROM {table} WHERE {column} = ?;"
+        logging.info(f"Executing validation query: {query} with value: {value}")
+        cursor = self.execute_query(query, (value,))
+        result = cursor.fetchone()  # Fetch the result from the cursor
+        logging.info(f"Validation result: {result}")
+        return result[0] > 0 if result else False
+
     def print_all(self, table_name):
         query = f"SELECT * FROM {table_name};"
         results = self.fetch_all(query)
@@ -45,3 +60,24 @@ class DBOperations:
         else:
             print(f"No records found in {table_name}.")
         logging.info(f"Printed all records from {table_name}.")
+
+    def validate_fields(self, validations):
+        """
+        Validates multiple fields using the database.
+        :param validations: List of dictionaries with table, column, value, and validation_type.
+        :raises ValueError: If any validation fails.
+        """
+        for validation in validations:
+            query = f"SELECT COUNT(*) FROM {validation['table']} WHERE {validation['column']} = ?;"
+            cursor = self.execute_query(query, (validation["value"],))
+            result = cursor.fetchone()
+            is_valid = result[0] > 0 if result else False
+
+            if validation["validation_type"] == "existing" and not is_valid:
+                raise ValueError(
+                    f"Validation failed: {validation['value']} does not exist in {validation['table']}.{validation['column']}."
+                )
+            elif validation["validation_type"] == "unique" and is_valid:
+                raise ValueError(
+                    f"Validation failed: {validation['value']} already exists in {validation['table']}.{validation['column']}."
+                )
