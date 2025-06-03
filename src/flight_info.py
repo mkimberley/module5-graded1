@@ -69,8 +69,10 @@ class FlightInfo:
         print("Flight created successfully.")
     except ValueError as e:
         print(f"Error: {e}")
+        raise
     except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")
+        raise
 
   def update_flight_information(self):
     try:

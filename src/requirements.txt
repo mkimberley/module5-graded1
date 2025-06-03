@@ -1,2 +1,4 @@
 sqlite3
 tabulate
+pytest
+pytest-mock
