@@ -78,7 +78,8 @@ class FlightInfo:
     try:
         flight_number = input("Enter the Flight Number to update: ")
         if not self.db_ops.check_validation("flights", "flight_number", flight_number):
-            print(f"Flight ID {flight_number} does not exist.")
+            print(f"Flight Number {flight_number} does not exist. Valid Flight Numbers are:")
+            self.view_all_flights()
             return
 
         fields_to_update = {
@@ -90,6 +91,14 @@ class FlightInfo:
             "aircraft_id": input("Enter new aircraft ID (leave blank to keep current): "),
             "status": input("Enter new flight status (leave blank to keep current): "),
         }
+
+        validations = [
+            {"table": "airports", "column": "airport_id", "value": fields_to_update["departure_airport_id"], "validation_type": "existing"},
+            {"table": "airports", "column": "airport_id", "value": fields_to_update["arrival_airport_id"], "validation_type": "existing"},
+            {"table": "aircraft", "column": "aircraft_id", "value": fields_to_update["aircraft_id"], "validation_type": "existing"},
+        ]
+        self.db_ops.validate_fields(validations)
+        
 
         updates, params = self._prepare_updates(fields_to_update)
         if not updates:
@@ -181,4 +190,39 @@ class FlightInfo:
         else:
             print("No flights found matching the given criteria.")
     except ValueError:
-        print("Invalid input. Please enter a number.")
+        print("Invalid input. Please enter a number")
+  
+  def view_all_flights(self):
+    query = """
+      SELECT 
+          flights.flight_id,
+          flights.flight_number,
+          departure_airport.airport_name AS departure_airport_name,
+          arrival_airport.airport_name AS arrival_airport_name,
+          flights.departure_time,
+          flights.arrival_time,
+          flights.status,
+          aircraft.model AS aircraft_model,
+          aircraft.registration_number AS aircraft_registration
+      FROM 
+          flights
+      JOIN 
+          airports AS departure_airport ON flights.departure_airport_id = departure_airport.airport_id
+      JOIN 
+          airports AS arrival_airport ON flights.arrival_airport_id = arrival_airport.airport_id
+      JOIN 
+          aircraft ON flights.aircraft_id = aircraft.aircraft_id;
+      """
+
+    results = self.db_ops.execute_query(query)  # Use DBOperations to execute query
+
+    if results:
+        headers = [
+            "Flight ID", "Flight Number", "Departure Airport", "Arrival Airport",
+            "Departure Time", "Arrival Time", "Status", "Aircraft Model", "Aircraft Registration"
+        ]
+        table = tabulate(results, headers=headers, tablefmt="grid")
+        print(table)
+    else:
+          print("No flights found.")
+     

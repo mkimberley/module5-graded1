@@ -7,6 +7,26 @@ class Pilots:
         self.db_ops = DBOperations(db_filename)
         self.db_ops.connect()
 
+    def view_all_pilots(self):
+        query = """
+        SELECT 
+            pilot.pilot_id,
+            pilot.first_name,
+            pilot.last_name,
+            pilot.license_number,
+            pilot.contact_info
+        FROM 
+            pilot;
+        """
+        results = self.db_ops.execute_query(query)
+
+        if results:
+            headers = ["Pilot ID", "First Name", "Last Name", "License Number", "Contact Info"]
+            table = tabulate(results, headers=headers, tablefmt="grid")
+            print(table)
+        else:
+            print("No pilots found.")
+
     def view_pilot(self):
         criteria_menu = [
             {"option": 1, "description": "By Pilot ID", "column": "pilot.pilot_id"},
@@ -74,7 +94,24 @@ class Pilots:
         return
     
     def assign_pilot_to_flight(self):
-        return
+        flight_number = input("Enter Flight Number: ")
+        pilot_id = input("Enter Pilot ID: ")
+
+        validations = [
+            (flight_number, "Flight Number"),
+            (pilot_id, "Pilot ID")
+        ]
+        for value, name in validations:
+            if not value.isdigit():
+                print(f"Invalid {name}. Please enter a valid number.")
+                return
+
+        query = """
+        INSERT INTO flight_pilot (flight_number, pilot_id)
+        VALUES (?, ?);
+        """
+        self.db_ops.execute_query(query, (flight_number, pilot_id))
+        print("Pilot assigned to flight successfully.")
     
     def remove_pilot_from_flight(self):
         return

@@ -4,13 +4,26 @@ from db_operations import DBOperations
 from db_initialise import initialise_database
 from greet import Greet
 from menu import Menu
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(colorlog.ColoredFormatter(
+    "%(log_color)s%(asctime)s - %(levelname)s - %(message)s",
+    log_colors={
+        'DEBUG':    'cyan',
+        'INFO':     'green',
+        'WARNING':  'yellow',
+        'ERROR':    'red',
+        'CRITICAL': 'bold_red',
+    }
+))
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler("squeezyjet.log"),
-        logging.StreamHandler()
+        handler  # Use the colorlog handler here
     ]
 )
 
