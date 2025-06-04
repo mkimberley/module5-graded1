@@ -21,7 +21,7 @@ class DBOperations:
         formatted_query = query
         for param in params:
             formatted_query = formatted_query.replace("?", f"'{param}'", 1)
-        logging.info(f"Executed query: {formatted_query.strip()}")
+        #logging.info(f"Executed query: {formatted_query.strip()}")
 
         return cursor
 
@@ -80,4 +80,8 @@ class DBOperations:
             elif validation["validation_type"] == "unique" and is_valid:
                 raise ValueError(
                     f"Validation failed: {validation['value']} already exists in {validation['table']}.{validation['column']}."
+                )
+            elif validation["validation_type"] == "not_empty" and not validation["value"]:
+                raise ValueError(
+                    f"Validation failed: {validation['column']} cannot be empty."
                 )

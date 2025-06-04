@@ -1,12 +1,12 @@
 from db_operations import DBOperations
 from tabulate import tabulate
+from common import Common
 
 class FlightInfo:
 
   def __init__(self, db_filename):
     self.db_ops = DBOperations(db_filename)
     self.db_ops.connect()
-
 
   def set_flight_id(self, flightID):
     self.flightID = flightID
@@ -43,29 +43,44 @@ class FlightInfo:
     try:
         print("Creating a new flight...")
         flight_number = input("Enter flight number: ")
-        departure_airport_id = input("Enter departure airport ID: ")
-        arrival_airport_id = input("Enter arrival airport ID: ")
+        departure_airport_name = input("Enter departure airport name: ")
+        arrival_airport_name = input("Enter arrival airport name: ")
         departure_time = input("Enter departure time (YYYY-MM-DD HH:MM:SS): ")
         arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM:SS): ")
         aircraft_id = input("Enter aircraft ID: ")
         status = input("Enter flight status: ")
 
+        # Validate aircraft_id and flight_number
         validations = [
-            {"table": "airports", "column": "airport_id", "value": departure_airport_id, "validation_type": "existing"},
-            {"table": "airports", "column": "airport_id", "value": arrival_airport_id, "validation_type": "existing"},
             {"table": "aircraft", "column": "aircraft_id", "value": aircraft_id, "validation_type": "existing"},
             {"table": "flights", "column": "flight_number", "value": flight_number, "validation_type": "unique"},
         ]
         self.db_ops.validate_fields(validations)
 
-        query = """INSERT INTO flights (flight_number, departure_airport_id, arrival_airport_id, 
-                            departure_time, arrival_time, aircraft_id, status)
-                   VALUES (?, ?, ?, ?, ?, ?, ?);"""
-        
-        params = (flight_number, departure_airport_id, arrival_airport_id,
-                  departure_time, arrival_time, aircraft_id, status)
+        query = """
+        INSERT INTO flights (
+            flight_number, departure_airport_id, arrival_airport_id, 
+            departure_time, arrival_time, aircraft_id, status
+        )
+        VALUES (
+            ?, 
+            (SELECT airport_id FROM airports WHERE airport_name = ?),
+            (SELECT airport_id FROM airports WHERE airport_name = ?),
+            ?, ?, ?, ?
+        );
+        """
 
-        self.db_ops.execute_query(query, params)  # Use DBOperations to execute query
+        params = (
+            flight_number,
+            departure_airport_name,
+            arrival_airport_name,
+            departure_time,
+            arrival_time,
+            aircraft_id,
+            status
+        )
+
+        self.db_ops.execute_query(query, params)
         print("Flight created successfully.")
     except ValueError as e:
         print(f"Error: {e}")
@@ -92,15 +107,18 @@ class FlightInfo:
             "status": input("Enter new flight status (leave blank to keep current): "),
         }
 
-        validations = [
-            {"table": "airports", "column": "airport_id", "value": fields_to_update["departure_airport_id"], "validation_type": "existing"},
-            {"table": "airports", "column": "airport_id", "value": fields_to_update["arrival_airport_id"], "validation_type": "existing"},
-            {"table": "aircraft", "column": "aircraft_id", "value": fields_to_update["aircraft_id"], "validation_type": "existing"},
-        ]
-        self.db_ops.validate_fields(validations)
-        
+        # Validate fields that are not empty
+        validations = []
+        if fields_to_update["departure_airport_id"]:
+            validations.append({"table": "airports", "column": "airport_id", "value": fields_to_update["departure_airport_id"], "validation_type": "existing"})
+        if fields_to_update["arrival_airport_id"]:
+            validations.append({"table": "airports", "column": "airport_id", "value": fields_to_update["arrival_airport_id"], "validation_type": "existing"})
+        if fields_to_update["aircraft_id"]:
+            validations.append({"table": "aircraft", "column": "aircraft_id", "value": fields_to_update["aircraft_id"], "validation_type": "existing"})
 
-        updates, params = self._prepare_updates(fields_to_update)
+        self.db_ops.validate_fields(validations)
+
+        updates, params = Common.prepare_updates(fields_to_update)
         if not updates:
             print("No fields to update.")
             return
@@ -115,19 +133,7 @@ class FlightInfo:
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-  def _prepare_updates(self, fields_to_update):
-    """
-    Helper function to prepare updates and parameters for SQL queries.
-    :param fields_to_update: Dictionary of fields and their new values.
-    :return: Tuple of updates and parameters.
-    """
-    updates = []
-    params = []
-    for field, value in fields_to_update.items():
-        if value:
-            updates.append(f"{field} = ?")
-            params.append(value)
-    return updates, params
+
 
   def view_flights_by_criteria(self):
     criteria_menu = [
@@ -193,6 +199,7 @@ class FlightInfo:
         print("Invalid input. Please enter a number")
   
   def view_all_flights(self):
+
     query = """
       SELECT 
           flights.flight_id,
@@ -226,3 +233,27 @@ class FlightInfo:
     else:
           print("No flights found.")
      
+
+  def delete_flight(self):
+    try:
+        flight_number = input("Enter the Flight Number to delete: ")
+        # Get the flight_id for the given flight_number
+        flight_id_query = "SELECT flight_id FROM flights WHERE flight_number = ?;"
+        cursor = self.db_ops.execute_query(flight_id_query, (flight_number,))
+        result = cursor.fetchall()
+        if not result:
+            print(f"Flight Number {flight_number} does not exist. Valid Flight Numbers are:")
+            self.view_all_flights()
+            return
+        flight_id = result[0][0]
+
+        # Delete related records in child tables
+        self.db_ops.execute_query("DELETE FROM flight_pilot WHERE flight_id = ?;", (flight_id,))
+        self.db_ops.execute_query("DELETE FROM schedules WHERE flight_id = ?;", (flight_id,))
+        self.db_ops.execute_query("DELETE FROM bookings WHERE flight_id = ?;", (flight_id,))
+
+        # Now delete the flight itself
+        self.db_ops.execute_query("DELETE FROM flights WHERE flight_number = ?;", (flight_number,))
+        print(f"Flight {flight_number} deleted successfully.")
+    except Exception as e:
+        print(f"Error deleting flight: {e}")

@@ -123,9 +123,6 @@ class Menu:
 
 # Flights Menu Functions
 
-    def create_flights_table(self):
-        print("Creating Flights Table...")
-
     def view_flights_by_criteria(self):
         self.flight_info.view_flights_by_criteria()
         
@@ -150,19 +147,19 @@ class Menu:
         self.pilots.view_pilot()
     
     def add_pilot(self):
-        print("Adding Pilot...")
+        self.pilots.add_pilot()
     
     def update_pilot_information(self):
-        print("Updating Pilot Information...")
+        self.pilots.update_pilot_information()
     
     def delete_pilot(self):
-        print("Deleting Pilot...")
+        self.pilots.delete_pilot()
 
     def assign_pilot_to_flight(self):
         self.pilots.assign_pilot_to_flight()
 
     def remove_pilot_from_flight(self):
-        print("Removing Pilot from Flight...")
+        self.pilots.remove_pilot_from_flight()
     
     def get_pilot_schedule(self):
         self.pilots.get_pilot_schedule()
@@ -173,13 +170,13 @@ class Menu:
         self.airports.view_airports()
     
     def add_airport(self):
-        print("Adding Airport...")
+        self.airports.add_airport()
 
     def update_airport_information(self):
-        print("Updating Airport Information...")
+        self.airports.update_airport_information()
     
     def delete_airport(self):
-        print("Deleting Airport...")
+        self.airports.delete_airport()
     
 
 # Generic
