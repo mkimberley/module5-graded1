@@ -50,9 +50,8 @@ def create_schema(db_filename):
         """,
         """
         CREATE TABLE IF NOT EXISTS flight_pilot (
-            flight_id INTEGER REFERENCES flights(flight_id),
-            pilot_id INTEGER REFERENCES pilot(pilot_id),
-            PRIMARY KEY (flight_id, pilot_id)
+            flight_id INTEGER PRIMARY KEY REFERENCES flights(flight_id),
+            pilot_id INTEGER REFERENCES pilot(pilot_id)
         );
         """,
         """

@@ -1,6 +1,7 @@
 from db_operations import DBOperations
 from tabulate import tabulate
 from common import Common
+import sqlite3
 
 class Pilots:
 
@@ -105,24 +106,29 @@ class Pilots:
         flight_number = input("Enter Flight Number: ")
         pilot_id = input("Enter Pilot ID: ")
 
-        # Validate aircraft_id and flight_number
         validations = [
             {"table": "pilot", "column": "pilot_id", "value": pilot_id, "validation_type": "existing"},
-            {"table": "flights", "column": "flight_number", "value": flight_number, "validation_type": "existing"},
+            {"table": "flights", "column": "flight_number", "value": flight_number, "validation_type": "unqiue"},
         ]
-        self.db_ops.validate_fields(validations)
-
+        try:
+            self.db_ops.validate_fields(validations)
+        except Exception as e:
+            print(f"Error assigning pilot to flight: {e}")
+            return
 
         query = """
-        INSERT INTO flight_pilot (flight_id, pilot_id)
-        VALUES (
-            (SELECT flight_id FROM flights WHERE flight_number = ?),
-            ?
-        );
-        """
-        self.db_ops.execute_query(query, (flight_number, pilot_id))
-        print(f"Pilot with ID {pilot_id} assigned to flight {flight_number} successfully.")
-
+                INSERT INTO flight_pilot (flight_id, pilot_id)
+                VALUES (
+                    (SELECT flight_id FROM flights WHERE flight_number = ?),
+                    ?
+                );
+                """
+        try:
+            self.db_ops.execute_query(query, (flight_number, pilot_id))
+            print(f"Pilot with ID {pilot_id} assigned to flight {flight_number} successfully.")
+        except sqlite3.IntegrityError as e:
+            print(f"Error assigning pilot to flight: {e}")
+        
     def remove_pilot_from_flight(self):
         flight_number = input("Enter Flight Number: ")
         pilot_id = input("Enter Pilot ID: ")
