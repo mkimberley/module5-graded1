@@ -154,45 +154,38 @@ class FlightInfo:
         {"option": 8, "description": "By Flight Number", "column": "flights.flight_number"},
     ]
 
-    print("\nSearch Criteria:")
-    print("****************")
-    for item in criteria_menu:
-        print(f" {item['option']}. {item['description']}")
-    print("\n")
+    # Use the Common class to get the user's selection
+    selection = Common.get_criteria_selection(criteria_menu)
+    if not selection:
+        return
+
+    selected_criteria, search_value = selection
+
+    query = f"""
+    SELECT 
+        flights.flight_id,
+        flights.flight_number,
+        departure_airport.airport_name AS departure_airport_name,
+        arrival_airport.airport_name AS arrival_airport_name,
+        flights.departure_time,
+        flights.arrival_time,
+        flights.status,
+        aircraft.model AS aircraft_model,
+        aircraft.registration_number AS aircraft_registration
+    FROM 
+        flights
+    JOIN 
+        airports AS departure_airport ON flights.departure_airport_id = departure_airport.airport_id
+    JOIN 
+        airports AS arrival_airport ON flights.arrival_airport_id = arrival_airport.airport_id
+    JOIN 
+        aircraft ON flights.aircraft_id = aircraft.aircraft_id
+    WHERE 
+        {selected_criteria['column']} = ?;
+    """
 
     try:
-        choice = int(input("Enter your choice: "))
-        selected_criteria = next((item for item in criteria_menu if item["option"] == choice), None)
-        if not selected_criteria:
-            print("Invalid choice. Please try again.")
-            return
-
-        search_value = input(f"Enter value for {selected_criteria['description']}: ")
-        query = f"""
-        SELECT 
-            flights.flight_id,
-            flights.flight_number,
-            departure_airport.airport_name AS departure_airport_name,
-            arrival_airport.airport_name AS arrival_airport_name,
-            flights.departure_time,
-            flights.arrival_time,
-            flights.status,
-            aircraft.model AS aircraft_model,
-            aircraft.registration_number AS aircraft_registration
-        FROM 
-            flights
-        JOIN 
-            airports AS departure_airport ON flights.departure_airport_id = departure_airport.airport_id
-        JOIN 
-            airports AS arrival_airport ON flights.arrival_airport_id = arrival_airport.airport_id
-        JOIN 
-            aircraft ON flights.aircraft_id = aircraft.aircraft_id
-        WHERE 
-            {selected_criteria['column']} = ?;
-        """
-
-        results = self.db_ops.execute_query(query, (search_value,))  # Use DBOperations to execute query
-
+        results = self.db_ops.execute_query(query, (search_value,))
         if results:
             headers = [
                 "Flight ID", "Flight Number", "Departure Airport", "Arrival Airport",
@@ -202,9 +195,9 @@ class FlightInfo:
             print(table)
         else:
             print("No flights found matching the given criteria.")
-    except ValueError:
-        print("Invalid input. Please enter a number")
-  
+    except Exception as e:
+        print(f"Error retrieving flights: {e}")
+
   def view_all_flights(self):
 
     query = """
