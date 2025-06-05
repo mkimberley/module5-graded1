@@ -1,6 +1,7 @@
 from db_operations import DBOperations
 from tabulate import tabulate
 from common import Common
+import textwrap
 
 class FlightInfo:
 
@@ -40,46 +41,52 @@ class FlightInfo:
       self.status)
   
   def create_flight(self):
+    print("Creating a new flight...")
+    flight_number = input("Enter flight number: ")
+    departure_airport_name = input("Enter departure airport name: ")
+    arrival_airport_name = input("Enter arrival airport name: ")
+    departure_time = input("Enter departure time (YYYY-MM-DD HH:MM:SS): ")
+    arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM:SS): ")
+    aircraft_id = input("Enter aircraft ID: ")
+    status = input("Enter flight status: ")
+
+    # Validate aircraft_id and flight_number
+    validations = [
+        {"table": "aircraft", "column": "aircraft_id", "value": aircraft_id, "validation_type": "existing"},
+        {"table": "flights", "column": "flight_number", "value": flight_number, "validation_type": "unique"},
+        {"table": "airports", "column": "airport_name", "value": departure_airport_name, "validation_type": "existing"},
+        {"table": "airports", "column": "airport_name", "value": arrival_airport_name, "validation_type": "existing"}
+    ]
     try:
-        print("Creating a new flight...")
-        flight_number = input("Enter flight number: ")
-        departure_airport_name = input("Enter departure airport name: ")
-        arrival_airport_name = input("Enter arrival airport name: ")
-        departure_time = input("Enter departure time (YYYY-MM-DD HH:MM:SS): ")
-        arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM:SS): ")
-        aircraft_id = input("Enter aircraft ID: ")
-        status = input("Enter flight status: ")
-
-        # Validate aircraft_id and flight_number
-        validations = [
-            {"table": "aircraft", "column": "aircraft_id", "value": aircraft_id, "validation_type": "existing"},
-            {"table": "flights", "column": "flight_number", "value": flight_number, "validation_type": "unique"},
-        ]
         self.db_ops.validate_fields(validations)
+    except ValueError as e:
+        print(f"Validation error: {e}")
+        return
 
-        query = """
-        INSERT INTO flights (
-            flight_number, departure_airport_id, arrival_airport_id, 
-            departure_time, arrival_time, aircraft_id, status
-        )
-        VALUES (
-            ?, 
-            (SELECT airport_id FROM airports WHERE airport_name = ?),
-            (SELECT airport_id FROM airports WHERE airport_name = ?),
-            ?, ?, ?, ?
-        );
-        """
 
-        params = (
-            flight_number,
-            departure_airport_name,
-            arrival_airport_name,
-            departure_time,
-            arrival_time,
-            aircraft_id,
-            status
-        )
+    query = textwrap.dedent("""
+    INSERT INTO flights (
+        flight_number, departure_airport_id, arrival_airport_id, 
+        departure_time, arrival_time, aircraft_id, status
+    )
+    VALUES (
+        ?, 
+        (SELECT airport_id FROM airports WHERE airport_name = ?),
+        (SELECT airport_id FROM airports WHERE airport_name = ?),
+        ?, ?, ?, ?
+    );
+    """)
 
+    params = (
+        flight_number,
+        departure_airport_name,
+        arrival_airport_name,
+        departure_time,
+        arrival_time,
+        aircraft_id,
+        status
+    )
+    try:
         self.db_ops.execute_query(query, params)
         print("Flight created successfully.")
     except ValueError as e:

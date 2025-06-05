@@ -2,6 +2,7 @@ from flight_info import FlightInfo
 from pilots import Pilots
 from db_operations import DBOperations
 from airports import Airports
+from summaries import Summaries
 
 class Menu:
     def __init__(self, db_filename):
@@ -10,14 +11,15 @@ class Menu:
         self.flight_info = FlightInfo(db_filename)
         self.pilots = Pilots(db_filename)
         self.airports = Airports(db_filename)
+        self.summaries = Summaries(db_filename)
 
 # Initialise Menu Items
 
         self.main_menu_items = [
             {"option": 1, "description": "Manage Flights", "function": self.handle_flights_menu},
             {"option": 2, "description": "Manage Pilots", "function": self.handle_pilots_menu},
-            {"option": 3, "description": "Manage Schedules", "function": self.handle_schedules_menu},
-            {"option": 4, "description": "Manage Airports", "function": self.handle_airports_menu},
+            {"option": 3, "description": "Manage Airports / Destinations", "function": self.handle_airports_menu},
+            {"option": 4, "description": "Show Summaries", "function": self.handle_summaries_menu},
             {"option": 10, "description": "Exit", "function": self.exit_program},
         ]
 
@@ -49,6 +51,17 @@ class Menu:
             {"option": 4, "description": "Delete Airport", "function": self.delete_airport},
             {"option": 10, "description": "Back to Main Menu", "function": self.go_back_to_main_menu},
         ]
+
+
+        self.summary_menu_items = [
+            {"option": 1, "description": "Show All Flights by Destination Airport", "function": self.summaries_destination_airport},
+            {"option": 2, "description": "Show All Flights by Departure Airport", "function": self.summaries_departure_airport},
+            {"option": 3, "description": "Show Flights by Pilot", "function": self.summaires_flights_by_pilot},
+            {"option": 4, "description": "Show all Schduled Flights", "function": self.summaries_scheduled_flights},
+            {"option": 5, "description": "Show all Cancelled Flights", "function": self.summaries_cancelled_flights},
+            {"option": 10, "description": "Back to Main Menu", "function": self.go_back_to_main_menu},
+        ]
+
 
 
 # Menu Input Handling
@@ -116,6 +129,17 @@ class Menu:
             else:
                 print("Invalid choice. Please try again.")    
 
+    def handle_summaries_menu(self):
+        while True:
+            self.display_menu(self.summary_menu_items)
+            choice = int(input("Enter your choice for Summaries Menu: "))
+            for item in self.summary_menu_items:
+                if item["option"] == choice:
+                    item["function"]()
+                    break
+            else:
+                print("Invalid choice. Please try again.")    
+
 
     def handle_schedules_menu(self):
         print("Schedules Menu is not implemented yet.")
@@ -177,6 +201,23 @@ class Menu:
     
     def delete_airport(self):
         self.airports.delete_airport()
+
+# Summaries Menu Functions
+    def summaries_destination_airport(self):
+        self.summaries.summaries_destination_airport()
+
+    def summaries_departure_airport(self):
+        self.summaries.summaries_departure_airport()
+
+    def summaires_flights_by_pilot(self):
+        self.summaries.summaires_flights_by_pilot()
+
+    def summaries_scheduled_flights(self):
+        self.summaries.summaries_scheduled_flights()
+
+    def summaries_cancelled_flights(self):
+        self.summaries.summaries_cancelled_flights()
+
     
 
 # Generic
