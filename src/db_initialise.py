@@ -53,33 +53,7 @@ def create_schema(db_filename):
             flight_id INTEGER PRIMARY KEY REFERENCES flights(flight_id),
             pilot_id INTEGER REFERENCES pilot(pilot_id)
         );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS schedules (
-            schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            flight_id INTEGER REFERENCES flights(flight_id),
-            schedule_date DATE NOT NULL
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS bookings (
-            booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            passenger_name TEXT NOT NULL,
-            flight_id INTEGER REFERENCES flights(flight_id),
-            booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            status TEXT NOT NULL
-        );
-        """,
-        """
-        CREATE TABLE IF NOT EXISTS passenger (
-            passenger_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            passenger_firstName TEXT NOT NULL,
-            passenger_lastName TEXT NOT NULL,
-            passenger_email TEXT UNIQUE NOT NULL,
-            passenger_address TEXT,
-            booking_id INTEGER REFERENCES bookings(booking_id),
-            status TEXT NOT NULL
-        );
+
         """
     ]
 

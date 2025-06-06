@@ -17,7 +17,6 @@ class DBOperations:
         cursor.execute(query, params)
         self.connection.commit()
 
-        # Log the query with actual values
         formatted_query = query
         for param in params:
             formatted_query = formatted_query.replace("?", f"'{param}'", 1)
@@ -62,11 +61,6 @@ class DBOperations:
         logging.info(f"Printed all records from {table_name}.")
 
     def validate_fields(self, validations):
-        """
-        Validates multiple fields using the database.
-        :param validations: List of dictionaries with table, column, value, and validation_type.
-        :raises ValueError: If any validation fails.
-        """
         for validation in validations:
             query = f"SELECT COUNT(*) FROM {validation['table']} WHERE {validation['column']} = ?;"
             cursor = self.execute_query(query, (validation["value"],))
