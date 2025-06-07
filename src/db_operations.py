@@ -20,7 +20,7 @@ class DBOperations:
         formatted_query = query
         for param in params:
             formatted_query = formatted_query.replace("?", f"'{param}'", 1)
-        logging.info(f"Executed query: {formatted_query.strip()}")
+        #logging.info(f"Executed query: {formatted_query.strip()}")
 
         return cursor
 
