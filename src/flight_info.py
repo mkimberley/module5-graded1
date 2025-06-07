@@ -249,8 +249,6 @@ class FlightInfo:
 
         # Delete related records in child tables
         self.db_ops.execute_query("DELETE FROM flight_pilot WHERE flight_id = ?;", (flight_id,))
-        self.db_ops.execute_query("DELETE FROM schedules WHERE flight_id = ?;", (flight_id,))
-        self.db_ops.execute_query("DELETE FROM bookings WHERE flight_id = ?;", (flight_id,))
 
         # Now delete the flight itself
         self.db_ops.execute_query("DELETE FROM flights WHERE flight_number = ?;", (flight_number,))

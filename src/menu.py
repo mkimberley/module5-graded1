@@ -57,8 +57,9 @@ class Menu:
             {"option": 1, "description": "Show All Flights by Destination Airport", "function": self.summaries_destination_airport},
             {"option": 2, "description": "Show All Flights by Departure Airport", "function": self.summaries_departure_airport},
             {"option": 3, "description": "Show Flights by Pilot", "function": self.summaires_flights_by_pilot},
-            {"option": 4, "description": "Show all Schduled Flights", "function": self.summaries_scheduled_flights},
-            {"option": 5, "description": "Show all Cancelled Flights", "function": self.summaries_cancelled_flights},
+            {"option": 4, "description": "Show Pilots assigned to Flights", "function": self.summaries_pilots_assigned_to_flights},
+            {"option": 5, "description": "Show all Schduled Flights", "function": self.summaries_scheduled_flights},
+            {"option": 6, "description": "Show all Cancelled Flights", "function": self.summaries_cancelled_flights},
             {"option": 10, "description": "Back to Main Menu", "function": self.go_back_to_main_menu},
         ]
 
@@ -217,6 +218,9 @@ class Menu:
 
     def summaries_cancelled_flights(self):
         self.summaries.summaries_cancelled_flights()
+    
+    def summaries_pilots_assigned_to_flights(self):
+        self.summaries.summaries_pilots_assigned_to_flights()
 
     
 

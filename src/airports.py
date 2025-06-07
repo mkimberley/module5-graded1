@@ -80,3 +80,64 @@ class Airports:
         query = "DELETE FROM airports WHERE airport_code = ?;"
         self.db_ops.execute_query(query, (airport_code,))
         print(f"Airport with code {airport_code} deleted successfully.")
+    
+    def update_airport_information(self):
+        try:
+            airport_code = input("Enter the Airport Code to update: ")
+
+            # Check that the airport_code exists
+            if not self.db_ops.check_validation("airports", "airport_code", airport_code):
+                print(f"Airport with code {airport_code} does not exist.")
+                return
+            fields_to_update = {
+                "airport_code": input("Enter new Airport Code (leave blank to keep current): "),
+                "airport_name": input("Enter new Airport Name (leave blank to keep current): "),
+                "city": input("Enter new City (leave blank to keep current): "),
+                "country": input("Enter new Country (leave blank to keep current): ")
+            }
+
+            # Validate fields
+            validations = []
+            if fields_to_update["airport_code"]:
+                validations.append({
+                    "table": "airports", 
+                    "column": "airport_code", 
+                    "value": fields_to_update["airport_code"], 
+                    "validation_type": "unique"
+                })
+            if fields_to_update["airport_name"]:
+                validations.append({
+                    "table": "airports", 
+                    "column": "airport_name", 
+                    "value": fields_to_update["airport_name"], 
+                    "validation_type": "unique"
+                })
+            if fields_to_update["city"]:
+                validations.append({
+                    "table": "airports", 
+                    "column": "city", 
+                    "value": fields_to_update["city"], 
+                    "validation_type": "not_empty"
+                })
+            if fields_to_update["country"]:
+                validations.append({
+                    "table": "airports", 
+                    "column": "country", 
+                    "value": fields_to_update["country"], 
+                    "validation_type": "not_empty"
+                })
+            self.db_ops.validate_fields(validations)
+
+            # Prepare the update query
+            update, params = Common.prepare_updates(fields_to_update)
+            if not update:
+                print("No fields to update.")
+                return
+            
+            params.append(airport_code)  # Add the airport_code for the WHERE clause
+            query = f"UPDATE airports SET {', '.join(update)} WHERE airport_code = ?;"
+            self.db_ops.execute_query(query, params)
+            print(f"Airport {airport_code} updated successfully.")
+        except ValueError as e:
+            print(f"Validation error: {e}") 
+            raise

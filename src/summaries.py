@@ -126,6 +126,46 @@ class Summaries:
             print(tabulate(result, headers=["Pilot ID", "First Name", "Last Name", "Flight Count"], tablefmt="grid"))
         else:
             print(f"No flights found for {selected_criteria['column']} '{value}'.")
+    
+    def summaries_pilots_assigned_to_flights(self):
+        criteria_menu = [
+            {"option": 1, "description": "By Flight Number", "column": "flight_number"},
+            {"option": 2, "description": "By Flight ID", "column": "flight_id"},
+        ]
+        selection = Common.get_criteria_selection(criteria_menu)
+        if not selection:
+            return
+
+        selected_criteria, value = selection
+        print(f"Selected criteria: {selected_criteria['column']} with value '{value}'")
+
+        validations = []
+        if selected_criteria['column'] == "flight_number":
+            validations.append({"table": "flights", "column": "flight_number", "value": value, "validation_type": "existing"})
+        elif selected_criteria['column'] == "flight_id":
+            validations.append({"table": "flights", "column": "flight_id", "value": value, "validation_type": "existing"})
+
+        try:
+            self.db_ops.validate_fields(validations)
+        except ValueError as e:
+            print(f"Validation error: {e}")
+            return
+
+        query = f"""
+        SELECT p.pilot_id, p.first_name, p.last_name
+        FROM pilot p
+        JOIN flight_pilot fp ON p.pilot_id = fp.pilot_id
+        JOIN flights f ON fp.flight_id = f.flight_id
+        WHERE f.{selected_criteria['column']} = ?
+        GROUP BY p.pilot_id, p.first_name, p.last_name
+        ORDER BY p.last_name DESC;
+        """
+        result = self.db_ops.execute_query(query, (value,))
+        if result:
+            print(f"Pilots assigned to flight {value}:")    
+            print(tabulate(result, headers=["Pilot ID", "First Name", "Last Name", "Flight Count"], tablefmt="grid"))
+        else:
+            print(f"No flights found for {selected_criteria['column']} '{value}'.")
 
     def summaries_scheduled_flights(self):
 
